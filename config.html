@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>الاعدادات</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+</head>
+
+<body class="config-page min-h-screen bg-transparent text-slate-900">
+  <div class="app">
+    <div class="content">
+      <header class="header">
+        <div class="container-inner">
+          <div class="header-left">
+            <div class="brand-shell d-flex align-items-center gap-2">
+              <img src="assets/logo.svg" alt="شعار إدارة الكاش" class="brand-logo" />
+              <div>
+                <h1 class="logo mb-0">إدارة كاشك</h1>
+              </div>
+            </div>
+            <nav class="navbar-inline" aria-label="القوائم">
+              <ul>
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="add_cash.html">محافظ الكاش</a></li>
+
+                <li><a href="reports.html">التقارير</a></li>
+                <li><a href="config.html">الإعدادات</a></li>
+              </ul>
+            </nav>
+          </div>
+
+          <div class="header-right">
+            <div class="user-quick">
+              <div class="welcome">
+                <span class="muted">مرحبًا،</span>
+                <strong id="userName">مشمش</strong>
+              </div>
+            </div>
+
+            <div class="icons">
+              <button type="button" class="theme-toggle" data-theme-toggle aria-label="تبديل الثيم">
+                <span class="theme-toggle__icon">🌙</span>
+                <span class="theme-toggle__label">الوضع الداكن</span>
+              </button>
+              <button class="icon-btn" aria-label="إشعارات البيع" onclick="openBox('trade')">
+                <!-- coin SVG -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" />
+                  <path d="M12 8v8M9 11h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+                <span id="tradeCount" class="badge">0</span>
+              </button>
+
+              <button class="icon-btn" aria-label="حدود المحفظة" onclick="openBox('limit')">
+                <!-- chart SVG -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 18h16M8 14v4M12 10v8M16 6v12" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span id="limitCount" class="badge">0</span>
+              </button>
+
+              <button class="icon-btn" aria-label="آخر مكالمة" onclick="openBox('call')">
+                <!-- phone SVG -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M22 16.92V20a2 2 0 0 1-2.18 2A19 19 0 0 1 3 5.18 2 2 0 0 1 5 3h3.09a1 1 0 0 1 1 .75c.12.56.36 1.77.6 2.37a1 1 0 0 1-.24 1L8.7 9.7a14 14 0 0 0 6.6 6.6l1.57-1.76a1 1 0 0 1 1-.24c.6.24 1.81.48 2.37.6a1 1 0 0 1 .75 1V16.92z"
+                    stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span id="callCount" class="badge">0</span>
+              </button>
+
+              <a href="logout.html" class="icon-btn logout" title="تسجيل الخروج" aria-label="تسجيل الخروج">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.2"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M16 17l5-5-5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                  <path d="M21 12H9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div id="notificationBox" class="notification-box hidden" data-type="">
+          <div class="box-header">
+            <h3 id="boxTitle">الإشعارات</h3>
+            <button type="button" onclick="markAllRead()">قراءة الكل</button>
+          </div>
+          <ul id="notificationList"></ul>
+        </div>
+      </header>
+
+
+      <section class="settings">
+        <div class="container">
+          <section class="page-hero">
+            <div>
+              <span class="page-badge">الإعدادات</span>
+              <h2>إعدادات النظام</h2>
+              <p>
+                إعدادت الفاتورة و القيم الثابت
+              </p>
+            </div>
+            <div class="page-hero__pill">متناسق مع التقارير</div>
+          </section>
+          <h2>بيانات الفاتورة</h2>
+          <div class="settings-grid row g-3">
+            <div class="col-12 col-lg-4">
+              <div class="card panel-surface p-3 h-100">
+                <label>شعار المحل</label>
+                <input id="logoInput" type="file" accept="image/*" />
+                <div id="logoPreviewWrap" class="settings-block-gap">
+                  <img id="logoPreview" src="" alt="logo" class="logo-preview" />
+                </div>
+                <div class="settings-block-gap">
+                  <button id="clearLogo" type="button" class="btn btn-outline-secondary">
+                    مسح الشعار
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-8">
+              <div class="card panel-surface p-3 h-100">
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label>اسم المحل</label>
+                    <input id="shopName" class="form-control" placeholder="اسم المحل" />
+                  </div>
+
+                  <div class="col-12">
+                    <label>رسالة منتصف الفاتورة (سطر/سطور)</label>
+                    <textarea id="midMessage" class="form-control" rows="4"
+                      placeholder="رسالة تظهر في وسط الفاتورة"></textarea>
+                  </div>
+
+                  <div class="col-12">
+                    <label>رسالة أسفل الفاتورة</label>
+                    <textarea id="footerMessage" class="form-control" rows="3"
+                      placeholder="رسالة تظهر في أسفل الفاتورة"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-action-row mt-3">
+            <button id="saveSettings" class="btn btn-primary">
+              حفظ الإعدادات
+            </button>
+            <button id="resetSettings" class="btn btn-outline-secondary">إعادة ضبط</button>
+          </div>
+
+          <hr class="settings-divider" />
+          <h3>قيم ثابتة</h3>
+          <div class="fixed-values">
+            <div class="settings-block-gap">
+              <button id="addFixedBtn" class="btn btn-outline-secondary">
+                إضافة قيمة ثابتة جديدة
+              </button>
+            </div>
+            <div id="fixedList" class="fixed-list"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="ui-alerts.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="bootstrap.bundle.min.js"></script>
+  <script src="add_cash.js"></script>
+  <script src="config.js"></script>
+  <script src="chart-init.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <script src="alert.js"></script>
+  <script src="theme-toggle.js"></script>
+  <script src="scroll-controls.js"></script>
+</body>
+
+</html>

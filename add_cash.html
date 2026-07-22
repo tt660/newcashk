@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>محافظ الكاش - إدارة الكاش</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+</head>
+
+<body class="add-cash-page min-h-screen bg-transparent text-slate-900">
+  <header class="header">
+    <div class="container-inner">
+      <div class="header-left">
+        <div class="brand-shell d-flex align-items-center gap-2">
+          <img src="assets/logo.svg" alt="شعار إدارة الكاش" class="brand-logo" />
+          <div>
+            <h1 class="logo mb-0">إدارة كاشك</h1>
+          </div>
+        </div>
+        <nav class="navbar-inline" aria-label="القوائم">
+          <ul>
+            <li><a href="index.html">الرئيسية</a></li>
+            <li><a href="add_cash.html">محافظ الكاش</a></li>
+
+            <li><a href="reports.html">التقارير</a></li>
+
+            <li><a href="config.html">الإعدادات</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="header-right">
+        <div class="user-quick">
+          <div class="welcome">
+            <span class="muted">مرحبًا،</span>
+            <strong id="userName">مشمش</strong>
+          </div>
+        </div>
+
+        <div class="icons">
+          <button type="button" class="theme-toggle" data-theme-toggle aria-label="تبديل الثيم">
+            <span class="theme-toggle__icon">🌙</span>
+            <span class="theme-toggle__label">الوضع الداكن</span>
+          </button>
+          <button type="button" class="icon-btn" aria-label="إشعارات البيع" onclick="openBox('trade')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" />
+              <path d="M12 8v8M9 11h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+            <span id="tradeCount" class="badge">0</span>
+          </button>
+
+
+
+
+
+          <button class="icon-btn" aria-label="حدود المحفظة" onclick="openBox('limit')">
+            <!-- chart SVG -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 18h16M8 14v4M12 10v8M16 6v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+            <span id="limitCount" class="badge">0</span>
+          </button>
+
+          <button class="icon-btn" aria-label="آخر مكالمة" onclick="openBox('call')">
+            <!-- phone SVG -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M22 16.92V20a2 2 0 0 1-2.18 2A19 19 0 0 1 3 5.18 2 2 0 0 1 5 3h3.09a1 1 0 0 1 1 .75c.12.56.36 1.77.6 2.37a1 1 0 0 1-.24 1L8.7 9.7a14 14 0 0 0 6.6 6.6l1.57-1.76a1 1 0 0 1 1-.24c.6.24 1.81.48 2.37.6a1 1 0 0 1 .75 1V16.92z"
+                stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span id="callCount" class="badge">0</span>
+          </button>
+
+
+
+          <a href="logout.html" class="icon-btn logout" title="تسجيل الخروج" aria-label="تسجيل الخروج">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.2"
+                stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M16 17l5-5-5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M21 12H9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div id="notificationBox" class="notification-box hidden" data-type="">
+      <div class="box-header">
+        <h3 id="boxTitle">الإشعارات</h3>
+        <button type="button" onclick="markAllRead()">قراءة الكل</button>
+      </div>
+      <ul id="notificationList"></ul>
+    </div>
+
+
+  </header>
+
+  <main class="main">
+    <div class="container add-cash-wrap">
+      <section class="page-hero shadow-2xl rounded-[24px]">
+        <div>
+          <span class="page-badge">إدارة المحافظ</span>
+          <h2>محافظ الكاش</h2>
+          <p>تابع أرصدتك و ابحث عن المحافظ و وراجع العمليات بسهولة.</p>
+        </div>
+        <div class="page-hero__pill">نظام موحد</div>
+      </section>
+      <div class="side-left">
+        <section class="page-header">
+          <div>
+            <div class="page-title">قائمة المحافظ</div>
+            <div class="page-sub">إدارةو إضافة وتعديل محافظ الكاش</div>
+          </div>
+        </section>
+
+        <section class="controls card panel-surface p-3 mb-3">
+          <div class="row g-2">
+            <div class="col-12 col-md-4 form-group">
+              <label for="phoneSearch">بحث برقم المحفظة</label>
+              <input id="phoneSearch" class="form-control" type="text" placeholder="أدخل رقم المحفظة" />
+            </div>
+          </div>
+          <div class="mt-3 between">
+            <div>
+              <label class="select-all"><input id="selectAll" type="checkbox" /> تحديد
+                الكل</label>
+              <span id="selectedCount" class="muted ms-2">0 محدد</span>
+            </div>
+            <div>
+              <button type="button" id="addWalletBtn" class="btn btn-primary">
+                إضافة محفظة
+              </button>
+              <button type="button" id="clearFilters" class="btn btn-outline-secondary">
+                مسح
+              </button>
+              <button type="button" id="zeroSelectedBtn" class="btn btn-outline-secondary">
+                تصفير المحدد
+              </button>
+              <button type="button" id="zeroAllBtn" class="btn btn-outline-secondary">
+                تصفير الكل
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="main-right">
+        <section class="analytics mb-3">
+          <div class="cards">
+            <div class="card metric indigo" id="cardCount">
+              <div class="value" id="walletCount">0</div>
+              <div class="label">عدد المحافظ</div>
+            </div>
+            <div class="card metric teal" id="cardTotal">
+              <div class="value" id="totalBalance">0.00</div>
+              <div class="label">إجمالي الرصيد</div>
+            </div>
+            <div class="card metric rose" id="cardRisk">
+              <div class="value" id="riskCount">0</div>
+              <div class="label">المحافظ المعرضة للخطر</div>
+            </div>
+            <div class="card metric amber" id="cardProfit">
+              <div class="value" id="profitLoss">0.00</div>
+              <div class="label">صافي الربح / الخسارة</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card panel-surface p-3 mb-3" id="riskListSection">
+          <h3>المحافظ المعرضة للخطر</h3>
+          <div id="riskContainer">لا توجد محافظ خطرة</div>
+        </section>
+        <div class="wallet-list">
+          <section class="wallet-cards">
+            <div id="walletCards" class="cards-grid" aria-live="polite"></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+  </div>
+  </div>
+
+  <!-- Add Wallet Modal -->
+  <div id="walletModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-panel panel-surface">
+      <header class="modal-header">
+        <div>
+          <h2>إضافة / تعديل محفظة</h2>
+          <p class="modal-intro">أضف بيانات المحفظة الجديدة هنا. يمكنك ملء الحقول الأساسية ثم حفظ المحفظة لإظهارها في
+            العرض الرئيسي.</p>
+        </div>
+        <button class="close" id="modalClose">×</button>
+      </header>
+
+      <form id="walletForm" class="modal-body">
+        <div class="field-grid">
+          <div class="row">
+            <label for="wPhone">رقم المحفظة</label>
+            <input id="wPhone" type="tel" maxlength="40" inputmode="numeric" placeholder="أدخل رقم المحفظة" />
+          </div>
+          <div class="row">
+            <label for="wBalance">الرصيد الحالي</label>
+            <input id="wBalance" type="number" min="0" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="row">
+            <label for="wWalletName">اسم المحفظة</label>
+            <input id="wWalletName" placeholder="فودافون كاش أو أورنج كاش أو إنستا باي أو إكسس باي" />
+          </div>
+          <div class="row">
+            <label for="wBranch">الفرع</label>
+            <input id="wBranch" placeholder="مثل: الجيزة" />
+          </div>
+          <div class="row">
+            <label for="wOwnerwalletlocation">مكان المحفظة</label>
+            <input id="wOwnerwalletlocation" placeholder="الدرج / المحفظة / الهاتف" />
+          </div>
+          <div class="row">
+            <label for="wMaxReceive">الحد الأقصى الشهري للشراء</label>
+            <input id="wMaxReceive" type="number" min="0" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="row">
+            <label for="wDailyMax">الحد الأقصى اليومي للشراء</label>
+            <input id="wDailyMax" type="number" min="0" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="row">
+            <label for="wReminderAmount">تذكير الشراء الشهري</label>
+            <input id="wReminderAmount" type="number" min="0" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="row">
+            <label for="wSold">حجم التحويل الشهري</label>
+            <input id="wSold" type="number" min="0" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="row">
+            <label for="wSoldDaily">حجم التحويل اليومي</label>
+            <input id="wSoldDaily" type="number" min="0" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="row">
+            <label for="wLastCall">تاريخ آخر مكالمة</label>
+            <input id="wLastCall" type="date" />
+          </div>
+          <div class="row">
+            <label for="wReminderDays">تذكير بعد عدد أيام</label>
+            <input id="wReminderDays" type="number" min="0" placeholder="0" />
+          </div>
+        </div>
+
+        <hr />
+
+        <div class="field-grid">
+          <div class="row">
+            <label for="wOwnerName">اسم صاحب المحفظة</label>
+            <input id="wOwnerName" placeholder="الاسم الكامل" />
+          </div>
+          <div class="row">
+            <label for="wOwnerMobile">موبايل صاحب المحفظة</label>
+            <input id="wOwnerMobile" type="tel" placeholder="010XXXXXXXX" />
+          </div>
+          <div class="row">
+            <label for="wOwnerNationalId">الرقم القومي</label>
+            <input id="wOwnerNationalId" placeholder="14 رقم" />
+          </div>
+          <div class="row">
+            <label for="wOwnerAddress">عنوان صاحب المحفظة</label>
+            <input id="wOwnerAddress" placeholder="العنوان الكامل" />
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button type="button" id="saveWallet" class="btn btn-primary">حفظ البيانات</button>
+          <button type="button" id="closeWallet" class="btn">إغلاق</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- Wallet Detail Modal -->
+  <div id="walletDetailModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-panel panel-surface wallet-detail-panel">
+      <header class="modal-header">
+        <h2>تفاصيل المحفظة</h2>
+        <button class="close" id="detailClose">×</button>
+      </header>
+
+      <div class="modal-body wallet-detail-body">
+        <div class="detail-summary">
+          <div class="detail-value">
+            <span class="detail-label">رقم المحفظة</span>
+            <span class="detail-text" id="detailPhone">-</span>
+          </div>
+          <div class="detail-value">
+            <span class="detail-label">الرصيد</span>
+            <span class="detail-text" id="detailBalance">0.00 ر.ج</span>
+          </div>
+        </div>
+        <div class="wallet-detail-grid" id="detailRows"></div>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" id="detailCloseBtn">إغلاق</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="theme.js"></script>
+  <script src="categories.js"></script>
+  <script src="home.js"></script>
+  <script src="add_cash.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <script src="alert.js"></script>
+  <script src="theme-toggle.js"></script>
+  <script src="scroll-controls.js"></script>
+</body>
+
+</html>

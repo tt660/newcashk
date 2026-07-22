@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>الرئيسية</title>
+  <script>
+    try {
+      if (typeof window.renderWalletSelect === 'undefined') {
+        window.renderWalletSelect = function () {
+          console.warn('renderWalletSelect placeholder called before initialization; ignored.');
+        };
+      }
+      try {
+        if (typeof renderWalletSelect === 'undefined') {
+          var renderWalletSelect = window.renderWalletSelect;
+        }
+      } catch (e) { }
+    } catch (e) { }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Accordion styles for transaction log */
+    .tx-log .accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .accordion-item {
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .accordion-header {
+      width: 100%;
+      text-align: right;
+      background: transparent;
+      border: 0;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .accordion-header .hdr-left {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .accordion-header .hdr-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .accordion-body {
+      padding: 12px;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      display: none;
+      background: var(--surface-2);
+    }
+
+    .accordion-item.open .accordion-body {
+      display: block;
+    }
+
+    .accordion-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-start;
+      margin-top: 8px;
+    }
+
+    .accordion-actions button {
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .accordion-header .profit {
+      color: green;
+    }
+
+    .accordion-header .loss {
+      color: #c00;
+    }
+  </style>
+
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
+</head>
+
+<div class="app">
+  <div class="content">
+    <header class="header">
+      <div class="container-inner">
+        <div class="header-left">
+          <div class="brand-shell d-flex align-items-center gap-2">
+            <img src="assets/logo.svg" alt="شعار إدارة الكاش" class="brand-logo" />
+            <div>
+              <h1 class="logo mb-0">إدارة كاشك</h1>
+            </div>
+          </div>
+          <nav class="navbar-inline" aria-label="القوائم">
+            <ul>
+              <li><a href="index.html">الرئيسية</a></li>
+              <li><a href="add_cash.html">محافظ الكاش</a></li>
+              <li><a href="reports.html">التقارير</a></li>
+              <li><a href="config.html">الإعدادات</a></li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="header-right">
+          <div class="user-quick">
+            <div class="welcome">
+              <span class="muted">مرحبًا،</span>
+              <strong id="userName">مشمش</strong>
+            </div>
+
+          </div>
+
+          <div class="icons">
+            <button type="button" class="theme-toggle" data-theme-toggle aria-label="تبديل الثيم">
+              <span class="theme-toggle__icon">🌙</span>
+              <span class="theme-toggle__label">الوضع الداكن</span>
+            </button>
+            <button class="icon-btn" aria-label="إشعارات البيع" onclick="openBox('trade')">
+              <!-- coin SVG -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" />
+                <path d="M12 8v8M9 11h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+              <span id="tradeCount" class="badge">0</span>
+            </button>
+
+            <button class="icon-btn" aria-label="حدود المحفظة" onclick="openBox('limit')">
+              <!-- chart SVG -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 18h16M8 14v4M12 10v8M16 6v12" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span id="limitCount" class="badge">0</span>
+            </button>
+
+            <button class="icon-btn" aria-label="آخر مكالمة" onclick="openBox('call')">
+              <!-- phone SVG -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M22 16.92V20a2 2 0 0 1-2.18 2A19 19 0 0 1 3 5.18 2 2 0 0 1 5 3h3.09a1 1 0 0 1 1 .75c.12.56.36 1.77.6 2.37a1 1 0 0 1-.24 1L8.7 9.7a14 14 0 0 0 6.6 6.6l1.57-1.76a1 1 0 0 1 1-.24c.6.24 1.81.48 2.37.6a1 1 0 0 1 .75 1V16.92z"
+                  stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span id="callCount" class="badge">0</span>
+            </button>
+
+
+
+            <a href="logout.html" class="icon-btn logout" title="تسجيل الخروج" aria-label="تسجيل الخروج">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.2"
+                  stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M16 17l5-5-5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path d="M21 12H9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div id="notificationBox" class="notification-box hidden" data-type="">
+        <div class="box-header">
+          <h3 id="boxTitle">الإشعارات</h3>
+          <button onclick="markAllRead()">قراءة الكل</button>
+        </div>
+        <ul id="notificationList"></ul>
+      </div>
+    </header>
+
+    <body class="home-page">
+      <main class="main">
+        <div class="container">
+          <section class="page-hero shadow-2xl rounded-[24px]">
+            <div>
+              <span class="page-badge">لوحة اجراء مبيعات</span>
+              <h2>الصفحة الرئيسية</h2>
+              <p>نظرة سريعة على الأداء اليومي والمحافظ والعمليات.</p>
+            </div>
+            <div class="page-hero__pill">محدثة لحظيا</div>
+          </section>
+
+          <!-- Today's report (Bootstrap cards) -->
+          <section class="today-report mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h3 class="mb-0">تقرير اليوم</h3>
+              <span class="page-badge">أداء لحظي</span>
+            </div>
+            <div class="row g-3">
+              <div class="col-6 col-md-2">
+                <div class="card text-end panel-surface">
+                  <div class="card-body">
+                    <div class="text-muted small">عدد عمليات الشراء</div>
+                    <div class="h5 fw-bold" id="todayBuyCount">0</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-2">
+                <div class="card text-end panel-surface">
+                  <div class="card-body">
+                    <div class="text-muted small">عدد عمليات البيع</div>
+                    <div class="h5 fw-bold" id="todaySellCount">0</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-4">
+                <div class="card text-end panel-surface">
+                  <div class="card-body">
+                    <div class="text-muted small">إجمالي سعر عمليات الشراء</div>
+                    <div class="h5 fw-bold" id="todayBuyTotal">0.00</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-4">
+                <div class="card text-end panel-surface">
+                  <div class="card-body">
+                    <div class="text-muted small">إجمالي سعر عمليات البيع</div>
+                    <div class="h5 fw-bold" id="todaySellTotal">0.00</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Selected wallet summary (Bootstrap cards) -->
+          <section class="wallet-summary mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h3 class="mb-0">ملخص المحفظة المختارة</h3>
+              <span class="page-badge">تفاصيل تشغيل</span>
+            </div>
+            <div class="row g-3">
+              <div class="col-6 col-md-3">
+                <div class="card text-end panel-surface">
+                  <div class="card-body">
+                    <div class="text-muted small">رصيد المحفظة</div>
+                    <div class="h5 fw-bold" id="selBalance">-</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="card text-end panel-surface">
+                  <div class="card-body">
+                    <div class="text-muted small">إجمالي شراء (السحب)</div>
+                    <div class="h5 fw-bold" id="selBuyTotal">0.00</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="card text-end panel-surface">
+                  <div class="card-body">
+                    <div class="text-muted small">إجمالي بيع (التحويل)</div>
+                    <div class="h5 fw-bold" id="selSellTotal">0.00</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="card text-end panel-surface">
+                  <div class="card-body">
+                    <div class="text-muted small">المتبقي للاستقبال الكلي</div>
+                    <div class="h5 fw-bold" id="selRemaining">-</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- All balances (Bootstrap card) -->
+          <section class="all-balances mb-3">
+            <h3 class="mb-2">جميع الأرصدة</h3>
+            <div class="row">
+              <div class="col-12 col-md-6">
+                <div class="card text-end panel-surface">
+                  <div class="card-body">
+                    <div class="text-muted small">إجمالي رصيد جميع المحافظ</div>
+                    <div class="h4 fw-bold" id="allBalances">0.00</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Action panel: select wallet, filter, fixed values, inputs and buy/sell -->
+          <section class="action-panel mb-3 panel-surface p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="mb-0">تنفيذ عملية</h3>
+              <span class="page-badge">إدارة تشغيل</span>
+            </div>
+
+            <div class="row g-2 align-items-end">
+              <div class="col-12 col-md-8">
+                <label class="form-label">اختر المحفظة</label>
+                <select id="walletSelect" class="form-select">
+                  <option value="">-- اختر --</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label">فلتر حسب التصنيف</label>
+                <select id="categoryFilter" class="form-select">
+                  <option value="">الكل</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-12">
+                <label class="d-block mb-2">القيم الثابتة</label>
+                <div id="fixedValueButtons" class="btn-group flex-wrap" role="group" aria-label="Fixed values"></div>
+                <select id="fixedValueSelect" class="d-none">
+                  <option value="">اختر قيمة</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row g-2 mt-3">
+              <div class="col-12 col-md-4">
+                <label class="form-label">رقم التليفون / المحفظة</label>
+                <input id="actionPhone" class="form-control" placeholder="رقم/محفظة" />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label">الرصيد المشحون</label>
+                <input id="chargedAmount" class="form-control" type="number" step="0.01" />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label">المبلغ المدفوع</label>
+                <input id="paidAmount" class="form-control" type="number" step="0.01" />
+              </div>
+            </div>
+
+            <div class="row mt-3">
+              <div class="col d-flex gap-2">
+                <button id="doBuy" type="button" class="btn btn-primary">تنفيذ شراء</button>
+                <button id="doSell" type="button" class="btn btn-outline-secondary">
+                  تنفيذ بيع
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- todo panel removed as requested -->
+
+          <!-- Transactions log (accordion) -->
+          <section class="tx-log">
+            <h3>سجل العمليات</h3>
+            <div class="accordion" id="log"></div>
+          </section>
+        </div>
+      </main>
+
+  </div>
+</div>
+
+
+<script src="ui-alerts.js" defer></script>
+<script src="bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="categories.js"></script>
+<script src="add_cash.js"></script>
+<script src="config.js"></script>
+<script src="home.js"></script>
+<script src="chart-init.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="alert.js"></script>
+<script src="theme-toggle.js"></script>
+<script src="scroll-controls.js"></script>
+</body>
+
+</html>

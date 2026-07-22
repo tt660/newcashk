@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>التقارير</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+</head>
+
+<body class="reports-page min-h-screen bg-transparent text-slate-900">
+  <div class="app">
+    <div class="content">
+      <header class="header">
+        <div class="container-inner">
+          <div class="header-left">
+            <div class="brand-shell d-flex align-items-center gap-2">
+              <img src="assets/logo.svg" alt="شعار إدارة الكاش" class="brand-logo" />
+              <div>
+                <h1 class="logo mb-0">إدارة كاشك</h1>
+              </div>
+            </div>
+            <nav class="navbar-inline" aria-label="القوائم">
+              <ul>
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="add_cash.html">محافظ الكاش</a></li>
+                <li><a href="reports.html">التقارير</a></li>
+                <li><a href="config.html">الإعدادات</a></li>
+              </ul>
+            </nav>
+          </div>
+
+          <div class="header-right">
+            <div class="user-quick">
+              <div class="welcome">
+                <span class="muted">مرحبًا،</span>
+                <strong id="userName">مشمش</strong>
+              </div>
+            </div>
+
+            <div class="icons">
+              <button type="button" class="theme-toggle" data-theme-toggle aria-label="تبديل الثيم">
+                <span class="theme-toggle__icon">🌙</span>
+                <span class="theme-toggle__label">الوضع الداكن</span>
+              </button>
+              <button class="icon-btn" aria-label="إشعارات البيع" onclick="openBox('trade')">
+                <!-- coin SVG -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" />
+                  <path d="M12 8v8M9 11h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+                <span id="tradeCount" class="badge">0</span>
+              </button>
+
+              <button class="icon-btn" aria-label="حدود المحفظة" onclick="openBox('limit')">
+                <!-- chart SVG -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 18h16M8 14v4M12 10v8M16 6v12" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span id="limitCount" class="badge">0</span>
+              </button>
+
+              <button class="icon-btn" aria-label="آخر مكالمة" onclick="openBox('call')">
+                <!-- phone SVG -->
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M22 16.92V20a2 2 0 0 1-2.18 2A19 19 0 0 1 3 5.18 2 2 0 0 1 5 3h3.09a1 1 0 0 1 1 .75c.12.56.36 1.77.6 2.37a1 1 0 0 1-.24 1L8.7 9.7a14 14 0 0 0 6.6 6.6l1.57-1.76a1 1 0 0 1 1-.24c.6.24 1.81.48 2.37.6a1 1 0 0 1 .75 1V16.92z"
+                    stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span id="callCount" class="badge">0</span>
+              </button>
+
+              <a href="logout.html" class="icon-btn logout" title="تسجيل الخروج" aria-label="تسجيل الخروج">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.2"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M16 17l5-5-5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                  <path d="M21 12H9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div id="notificationBox" class="notification-box hidden" data-type="">
+          <div class="box-header">
+            <h3 id="boxTitle">الإشعارات</h3>
+            <button onclick="markAllRead()">قراءة الكل</button>
+          </div>
+          <ul id="notificationList"></ul>
+        </div>
+      </header>
+
+      <main class="container my-4 reports-main">
+        <section class="page-hero shadow-2xl rounded-[24px]">
+          <div class="page-hero__content">
+            <span class="page-badge">لوحة التحليل</span>
+            <h2>تقارير مالية شاملة</h2>
+            <p>
+              تابع تقاريرك 
+            </p>
+          </div>
+          <div class="page-hero__pill">محدثة لحظيا</div>
+        </section>
+
+        <!-- Analysis cards -->
+        <section class="reports-analysis mb-4">
+          <div class="row g-3">
+            <div class="col-6 col-md-2">
+              <div class="card text-end panel-surface">
+                <div class="card-body">
+                  <div class="text-muted small">إجمالي العمليات</div>
+                  <div class="h5 fw-bold" id="rptTotalTx">0</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-2">
+              <div class="card text-end panel-surface">
+                <div class="card-body">
+                  <div class="text-muted small">إجمالي شراء</div>
+                  <div class="h5 fw-bold" id="rptTotalBuy">0.00</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-2">
+              <div class="card text-end panel-surface">
+                <div class="card-body">
+                  <div class="text-muted small">إجمالي بيع</div>
+                  <div class="h5 fw-bold" id="rptTotalSell">0.00</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card text-end panel-surface">
+                <div class="card-body">
+                  <div class="text-muted small">إجمالي الأرصدة</div>
+                  <div class="h5 fw-bold" id="rptTotalAmount">0.00</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="card text-end panel-surface">
+                <div class="card-body">
+                  <div class="text-muted small">ربح الفترة المختارة</div>
+                  <div class="h5 fw-bold text-success" id="rptNetProfit">
+                    ••••
+                  </div>
+                  <button id="unlockProfitBtn" type="button" class="btn btn-sm btn-outline-secondary mt-2">
+                    عرض
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="card text-end panel-surface">
+                <div class="card-body">
+                  <div class="text-muted small">صافي الربح الاجمالي</div>
+                  <div class="h5 fw-bold text-success" id="rptNetProfitSummary">
+                    ••••
+                  </div>
+                  <button id="unlockProfitSummaryBtn" type="button" class="btn btn-sm btn-outline-secondary mt-2">
+                    عرض
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Filters and tools -->
+        <section class="reports-filters mb-4">
+          <div class="card panel-surface">
+            <div class="card-body">
+              <form id="reportsForm" class="row g-2 align-items-end">
+                <div class="col-12 col-md-4">
+                  <label class="form-label">محفظة</label>
+                  <select id="reportWalletSelect" class="form-select">
+                    <option value="">الكل</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-3">
+                  <label class="form-label">تصنيف المحفظة</label>
+                  <select id="reportCategory" class="form-select">
+                    <option value="">الكل</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-2">
+                  <label class="form-label">رقم العملية</label>
+                  <input id="reportOpId" type="text" class="form-control" placeholder="رقم العملية" />
+                </div>
+                <div class="col-12 col-md-3">
+                  <label class="form-label">هاتف / محفظة</label>
+                  <input id="reportPhone" type="text" class="form-control" placeholder="رقم الهاتف أو المحفظة" />
+                </div>
+                <div class="col-6 col-md-2">
+                  <label class="form-label">من</label>
+                  <input id="reportFrom" type="date" class="form-control" />
+                </div>
+                <div class="col-6 col-md-2">
+                  <label class="form-label">إلى</label>
+                  <input id="reportTo" type="date" class="form-control" />
+                </div>
+                <div class="col-12 col-md-2">
+                  <label class="form-label">نوع العملية</label>
+                  <select id="reportType" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="buy">شراء</option>
+                    <option value="sell">بيع</option>
+                  </select>
+                </div>
+                <div class="col-6 col-md-2">
+                  <label class="form-label">الحد الأدنى للرصد</label>
+                  <input id="reportMinAmount" type="number" class="form-control" placeholder="0" />
+                </div>
+                <div class="col-6 col-md-2">
+                  <label class="form-label">الحد الأقصى للرصد</label>
+                  <input id="reportMaxAmount" type="number" class="form-control" placeholder="0" />
+                </div>
+                <div class="col-12 col-md-2">
+                  <label class="form-label">بحث</label>
+                  <div class="input-group">
+                    <input id="reportSearch" type="search" class="form-control" placeholder="بحث برقم/ملاحظة..." />
+                    <button id="runReportBtn" type="button" class="btn btn-primary">
+                      تشغيل
+                    </button>
+                  </div>
+                </div>
+                <div class="col-12 d-flex gap-2 mt-2">
+                  <button id="exportCsv" type="button" class="btn btn-outline-secondary">
+                    تصدير CSV
+                  </button>
+                  <button id="exportExcel" type="button" class="btn btn-outline-secondary">
+                    تصدير Excel
+                  </button>
+                  <button id="printReport" type="button" class="btn btn-outline-secondary">
+                    طباعة
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- Results and visualization -->
+        <section class="reports-results">
+          <div class="row">
+            <div class="col-12 col-lg-8 mb-3">
+              <div class="card panel-surface data-panel indigo">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0">النتائج</h5>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="عرض النتائج">
+                      <button id="reportViewAccordion" type="button" class="btn btn-outline-secondary active">
+                        قائمة
+                      </button>
+                      <button id="reportViewTable" type="button" class="btn btn-outline-secondary">
+                        جدول
+                      </button>
+                    </div>
+                  </div>
+                  <div class="card p-3 data-panel panel-surface">
+                    <div id="reportResultsAccordion" class="accordion"></div>
+                  </div>
+                  <div id="reportResultsTable" class="table-responsive" style="display: none"></div>
+                  <nav aria-label="Page navigation" id="reportPagination"></nav>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="ui-alerts.js" defer></script>
+  <script src="bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="categories.js"></script>
+  <script src="add_cash.js"></script>
+  <script src="reports.js"></script>
+  <script src="chart-init.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <script src="alert.js"></script>
+  <script src="theme-toggle.js"></script>
+  <script src="scroll-controls.js"></script>
+</body>
+
+</html>
