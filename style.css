@@ -7,7 +7,7 @@
   --surface: rgba(255, 255, 255, 0.92);
   --surface-2: rgba(248, 250, 252, 0.96);
   --text: #0f172a;
-  --muted: #64748b;
+  --muted: #272b31;
   --border: rgba(148, 163, 184, 0.25);
   --shadow: 0 20px 45px rgba(15, 23, 42, 0.14);
   --shadow-sm: 0 12px 30px rgba(15, 23, 42, 0.08);
@@ -679,6 +679,7 @@ input {
   background: var(--surface-2);
   color: var(--text);
   padding: 0.7rem 0.85rem;
+  border: 1px solid #020617;
 }
 
 :root[data-theme="dark"] .form-control,
@@ -1235,4 +1236,11 @@ section {
   .page-hero {
     padding: 1.1rem;
   }
+}
+
+.meta{
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 0.65rem 0.85rem;
 }
