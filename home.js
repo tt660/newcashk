@@ -861,7 +861,7 @@ try {
     if (!filteredTx.length) {
       container.innerHTML = `<div class="empty-log" style="padding:16px;color:#555;text-align:center;">${
         todayOnly
-          ? "لا توجد عمليات لهذا اليوم بعد. قم بتنفيذ عملية جديدة أو حرّك الصفحة."
+          ? "لا توجد عمليات لهذا اليوم بعد. قم بتنفيذ عملية جديدة."
           : "لا توجد عمليات حتى الآن."
       }</div>`;
       return;
