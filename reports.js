@@ -419,13 +419,13 @@
           <div id="collapse${t.id}" class="accordion-collapse collapse" aria-labelledby="heading${t.id}" data-bs-parent="#reportResultsAccordion">
             <div class="accordion-body">
               <div class="mb-2">ملاحظة: ${t.note || "-"}</div>
-              <div class="d-flex gap-2 flex-wrap justify-content-end">
-                <button class="btn btn-sm btn-outline-primary view-btn">عرض</button>
-                <button class="btn btn-sm btn-outline-success edit-btn">تعديل</button>
-                <button class="btn btn-sm btn-outline-danger del-btn">حذف</button>
-                <button class="btn btn-sm btn-outline-secondary print-btn">طباعة</button>
-              </div>
             </div>
+          </div>
+          <div class="accordion-actions-wrapper border-top py-2 px-3 d-flex gap-2 flex-wrap justify-content-end">
+            <button class="btn btn-sm btn-outline-primary view-btn">عرض</button>
+            <button class="btn btn-sm btn-outline-success edit-btn">تعديل</button>
+            <button class="btn btn-sm btn-outline-danger del-btn">حذف</button>
+            <button class="btn btn-sm btn-outline-secondary print-btn">طباعة</button>
           </div>
         `;
 
