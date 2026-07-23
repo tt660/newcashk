@@ -429,6 +429,21 @@ try {
     initTodoPanel();
   }
 
+  function initTodoPanel() {
+    renderTodoList();
+  }
+
+  function setupDailyUI() {
+    try {
+      const reloaded = ensureDailyUI();
+      if (reloaded) return true;
+      initTodoPanel();
+    } catch (e) {
+      console.error("setupDailyUI error", e);
+    }
+    return false;
+  }
+
   function format(n) {
     return Number(n || 0).toFixed(2);
   }
@@ -836,23 +851,29 @@ try {
   function renderTxLog() {
     const container = q("log");
     if (!container) return;
-    container.innerHTML = "";
     const txRecords = getTx();
-    const tx = (
-      shouldShowTodayTransactions()
-        ? txRecords.filter(
-            (t) => (t.date || "").slice(0, 10) === getTodayDate(),
-          )
-        : txRecords
-    )
-      .slice()
-      .sort((a, b) => {
-        const da = new Date(a.date || 0).getTime();
-        const db = new Date(b.date || 0).getTime();
-        const ta = isFinite(da) ? da : a.id || 0;
-        const tb = isFinite(db) ? db : b.id || 0;
-        return tb - ta;
-      });
+    const todayOnly = shouldShowTodayTransactions();
+    const filteredTx = todayOnly
+      ? txRecords.filter((t) => (t.date || "").slice(0, 10) === getTodayDate())
+      : txRecords;
+
+    container.innerHTML = "";
+    if (!filteredTx.length) {
+      container.innerHTML = `<div class="empty-log" style="padding:16px;color:#555;text-align:center;">${
+        todayOnly
+          ? "لا توجد عمليات لهذا اليوم بعد. قم بتنفيذ عملية جديدة أو حرّك الصفحة."
+          : "لا توجد عمليات حتى الآن."
+      }</div>`;
+      return;
+    }
+
+    const tx = filteredTx.slice().sort((a, b) => {
+      const da = new Date(a.date || 0).getTime();
+      const db = new Date(b.date || 0).getTime();
+      const ta = isFinite(da) ? da : a.id || 0;
+      const tb = isFinite(db) ? db : b.id || 0;
+      return tb - ta;
+    });
 
     tx.forEach((t) => {
       const d = computeDiffForTx(t);
@@ -1425,7 +1446,7 @@ try {
   try {
     window.addEventListener("storage", (e) => {
       try {
-        if (e.key === "wallets_v1") {
+        if (e.key === "wallets_v1" || e.key === "transactions_v1") {
           renderWalletSelect();
           onWalletChange();
           computeOverview();
