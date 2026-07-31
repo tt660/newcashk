@@ -629,7 +629,7 @@
     editingId = wallet.id;
     // prefill modal fields
     wPhone.value = wallet.phone || "";
-    wWalletName.value = wallet.walletName || "";
+    wWalletName.value = wallet.walletName || wallet.name || "";
     wBranch.value = wallet.branch || "";
     wBalance.value = wallet.balance || "";
     wPurchase.value = wallet.slotInfo || "";
@@ -657,7 +657,7 @@
     editingId = null;
     // prefill modal fields
     wPhone.value = wallet.phone || "";
-    wWalletName.value = wallet.walletName || "";
+    wWalletName.value = wallet.walletName || wallet.name || "";
     wBranch.value = wallet.branch || "";
     wBalance.value = wallet.balance || "";
     wPurchase.value = wallet.slotInfo || "";
@@ -789,6 +789,7 @@
       if (found) {
         found.phone = phoneVal;
         found.walletName = wWalletName.value || "";
+        found.name = wWalletName.value || found.name || "";
         found.branch = wBranch.value || "";
         found.balance = Number(wBalance.value) || 0;
         // keep initialBalance unless user changes it explicitly (if not set, set now)
@@ -826,6 +827,7 @@
       id: Date.now(),
       phone: phoneVal,
       walletName: wWalletName.value || "",
+      name: wWalletName.value || "",
       branch: wBranch.value || "",
       balance: Number(wBalance.value) || 0,
       initialBalance: Number(wBalance.value) || 0,

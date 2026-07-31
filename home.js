@@ -861,7 +861,7 @@ try {
     if (!filteredTx.length) {
       container.innerHTML = `<div class="empty-log" style="padding:16px;color:#555;text-align:center;">${
         todayOnly
-          ? "لا توجد عمليات لهذا اليوم بعد. قم بتنفيذ عملية جديدة."
+          ? "لا توجد عمليات لهذا اليوم بعد. قم بتنفيذ عملية جديدة أو حرّك الصفحة."
           : "لا توجد عمليات حتى الآن."
       }</div>`;
       return;
@@ -963,10 +963,13 @@ try {
       (Array.isArray(wallets)
         ? wallets
             .map((w) => {
-              const bal = Number(w.balance || 0).toFixed(2);
-              const main = w.main || "";
+              const displayNumber = w.phone || w.id || "";
+              const bal = format(w.balance);
+              const main = w.main || w.name || w.walletName || "";
               const sub = w.sub ? " • " + w.sub : "";
-              return `<option value="${w.id}">${w.phone} • ${main}${sub} • ${bal}</option>`;
+              return `<option value="${escapeHtml(String(w.id))}">${escapeHtml(
+                String(displayNumber),
+              )} • ${escapeHtml(String(bal))} • ${escapeHtml(main + sub)}</option>`;
             })
             .join("")
         : "");
@@ -1324,10 +1327,15 @@ try {
         '<option value="">-- اختر --</option>' +
         wallets
           .filter((w) => !v || w.main === v)
-          .map(
-            (w) =>
-              `<option value="${w.id}">${w.phone} • ${w.main || ""} ${w.sub ? "• " + w.sub : ""}</option>`,
-          )
+          .map((w) => {
+            const displayNumber = w.phone || w.id || "";
+            const bal = format(w.balance);
+            const main = w.main || w.name || w.walletName || "";
+            const sub = w.sub ? " • " + w.sub : "";
+            return `<option value="${escapeHtml(String(w.id))}">${escapeHtml(
+              String(displayNumber),
+            )} • ${escapeHtml(String(bal))} • ${escapeHtml(main + sub)}</option>`;
+          })
           .join("");
       // restore saved selection if still available
       try {

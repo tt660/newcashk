@@ -13,6 +13,7 @@
   const resetBtn = document.getElementById("resetSettings");
   const addFixedBtn = document.getElementById("addFixedBtn");
   const fixedListEl = document.getElementById("fixedList");
+  const enableAutocompleteEl = document.getElementById('enableAutocomplete');
 
   let fixedValues = [];
 
@@ -37,6 +38,7 @@
           ? logoPreview.src
           : null,
       fixedValues: Array.isArray(fixedValues) ? fixedValues : [],
+      autocompleteEnabled: enableAutocompleteEl ? Boolean(enableAutocompleteEl.checked) : true,
       updatedAt: new Date().toISOString(),
     };
     try {
@@ -74,6 +76,7 @@
           logoPreview.style.display = "block";
         }
       }
+      if (enableAutocompleteEl) enableAutocompleteEl.checked = obj.hasOwnProperty('autocompleteEnabled') ? Boolean(obj.autocompleteEnabled) : true;
       if (Array.isArray(obj.fixedValues)) {
         fixedValues = obj.fixedValues.slice();
       }
@@ -243,6 +246,20 @@
   if (saveBtn) saveBtn.addEventListener("click", saveSettings);
   if (resetBtn) resetBtn.addEventListener("click", resetSettings);
   if (addFixedBtn) addFixedBtn.addEventListener("click", addFixedValueUI);
+  if (enableAutocompleteEl) {
+    enableAutocompleteEl.addEventListener('change', function () {
+      // persist immediately
+      // load current storage, modify flag, save
+      try {
+        const raw = localStorage.getItem(INVOICE_KEY);
+        const obj = raw ? JSON.parse(raw) : {};
+        obj.autocompleteEnabled = Boolean(enableAutocompleteEl.checked);
+        localStorage.setItem(INVOICE_KEY, JSON.stringify(obj));
+        // notify other windows/listeners
+        try { window.dispatchEvent(new Event('storage')); } catch (e) {}
+      } catch (e) {}
+    });
+  }
 
   document.addEventListener("DOMContentLoaded", loadSettings);
 })();
