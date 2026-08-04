@@ -436,6 +436,16 @@ label {
   filter: brightness(1.05);
 }
 
+.wallet-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid #000;
+}
+
 
 .wallet-card {
   padding: 1rem;
