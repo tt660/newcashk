@@ -24,18 +24,59 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css">
   <style>
+    /* Searchable select styles */
+    .wallet-select-wrapper {
+      position: relative;
+    }
+    .wallet-select-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .wallet-select-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 20;
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      padding: 8px;
+      max-height: 280px;
+      overflow: auto;
+    }
+    .wallet-select-dropdown.d-none {
+      display: none;
+    }
+    .wallet-select-option {
+      padding: 7px 10px;
+      cursor: pointer;
+      border-radius: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .wallet-select-option:hover,
+    .wallet-select-option.active {
+      background: rgba(13, 110, 253, 0.08);
+    }
+    .wallet-select-toggle .dropdown-arrow {
+      font-size: 0.9rem;
+      color: #495057;
+    }
+    .wallet-select-search {
+      margin-bottom: 8px;
+    }
+
     /* Accordion styles for transaction log */
     .tx-log .accordion {
       display: flex;
       flex-direction: column;
       gap: 8px;
-    }
-
-    .accordion-item {
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      border-radius: 12px;
-      overflow: hidden;
-      background: var(--surface);
     }
 
     .accordion-header {
@@ -312,7 +353,17 @@
             <div class="row g-2 align-items-end">
               <div class="col-12 col-md-8">
                 <label class="form-label">اختر المحفظة</label>
-                <select id="walletSelect" class="form-select">
+                <div class="wallet-select-wrapper">
+                  <div id="walletPicker" class="wallet-select-toggle" role="button" aria-haspopup="listbox" aria-expanded="false" tabindex="0">
+                    <span id="walletPickerLabel">-- اختر --</span>
+                    <span class="dropdown-arrow">▾</span>
+                  </div>
+                  <div id="walletPickerDropdown" class="wallet-select-dropdown d-none" role="listbox" aria-label="قائمة المحفظة">
+                    <input id="walletPickerSearch" class="form-control form-control-sm wallet-select-search" placeholder="اكتب رقم المحفظة للبحث" autocomplete="off" />
+                    <div id="walletPickerOptions" class="wallet-select-options"></div>
+                  </div>
+                </div>
+                <select id="walletSelect" class="form-select d-none" aria-hidden="true" tabindex="-1">
                   <option value="">-- اختر --</option>
                 </select>
               </div>
