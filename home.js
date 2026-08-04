@@ -1367,6 +1367,7 @@ try {
       dropdown.classList.remove("d-none");
       wrapper.setAttribute("aria-expanded", "true");
       searchInput.value = "";
+      optionsContainer.style.display = "none";
       filterOptions();
       searchInput.focus();
     }
@@ -1399,7 +1400,7 @@ try {
         const text = raw.toLowerCase();
         const digits = (raw.match(/\d+/g) || []).join("");
         let match = false;
-        if (!query) match = true;
+        if (!query) match = false;
         else if (queryDigits && queryDigits.length === query.length) {
           match = digits.includes(queryDigits);
         } else {
@@ -1412,6 +1413,7 @@ try {
         }
       });
 
+      optionsContainer.style.display = query ? "block" : "none";
       setActive(selected || first);
     }
 
