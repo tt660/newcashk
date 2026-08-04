@@ -1019,6 +1019,9 @@ try {
         btnContainer.appendChild(b);
       });
     }
+
+    renderWalletPickerOptions();
+    syncWalletPickerSelection();
   }
 
   function onWalletChange() {
@@ -1311,9 +1314,210 @@ try {
     }
   }
 
+  function renderWalletPickerOptions() {
+    const sel = q("walletSelect");
+    const container = q("walletPickerOptions");
+    if (!sel || !container) return;
+
+    const html = Array.from(sel.options || [])
+      .map((opt) => {
+        const value = opt.value || "";
+        const text = opt.textContent || opt.label || "";
+        return `<div class="wallet-select-option" role="option" data-value="${escapeHtml(
+          String(value),
+        )}">${escapeHtml(String(text))}</div>`;
+      })
+      .join("");
+
+    container.innerHTML = html;
+  }
+
+  function syncWalletPickerSelection() {
+    const sel = q("walletSelect");
+    const label = q("walletPickerLabel");
+    const optionsContainer = q("walletPickerOptions");
+    if (!sel || !label || !optionsContainer) return;
+
+    const selectedOption = sel.selectedOptions && sel.selectedOptions[0];
+    label.textContent = selectedOption
+      ? selectedOption.textContent || selectedOption.label || "-- اختر --"
+      : "-- اختر --";
+
+    Array.from(optionsContainer.querySelectorAll(".wallet-select-option")).forEach(
+      (item) => {
+        item.classList.toggle("active", item.dataset.value === String(sel.value));
+      },
+    );
+  }
+
+  function attachWalletPicker() {
+    const wrapper = q("walletPicker");
+    const dropdown = q("walletPickerDropdown");
+    const searchInput = q("walletPickerSearch");
+    const optionsContainer = q("walletPickerOptions");
+    const sel = q("walletSelect");
+    if (!wrapper || !dropdown || !searchInput || !optionsContainer || !sel) return;
+
+    function closeDropdown() {
+      dropdown.classList.add("d-none");
+      wrapper.setAttribute("aria-expanded", "false");
+    }
+
+    function openDropdown() {
+      dropdown.classList.remove("d-none");
+      wrapper.setAttribute("aria-expanded", "true");
+      searchInput.value = "";
+      filterOptions();
+      searchInput.focus();
+    }
+
+    function setActive(item) {
+      Array.from(optionsContainer.querySelectorAll(".wallet-select-option")).forEach(
+        (opt) => opt.classList.toggle("active", opt === item),
+      );
+      if (item) {
+        item.scrollIntoView({ block: "nearest" });
+      }
+    }
+
+    function getVisibleItems() {
+      return Array.from(optionsContainer.querySelectorAll(".wallet-select-option")).filter(
+        (item) => !item.hidden,
+      );
+    }
+
+    function filterOptions() {
+      const query = String(searchInput.value || "").trim();
+      const queryLower = query.toLowerCase();
+      const queryDigits = query.replace(/\D/g, "");
+      let first = null;
+      let selected = null;
+      const currentValue = sel.value || "";
+
+      Array.from(optionsContainer.querySelectorAll(".wallet-select-option")).forEach((item) => {
+        const raw = item.textContent || "";
+        const text = raw.toLowerCase();
+        const digits = (raw.match(/\d+/g) || []).join("");
+        let match = false;
+        if (!query) match = true;
+        else if (queryDigits && queryDigits.length === query.length) {
+          match = digits.includes(queryDigits);
+        } else {
+          match = text.includes(queryLower);
+        }
+        item.hidden = !match;
+        if (match) {
+          if (!first) first = item;
+          if (item.dataset.value === String(currentValue)) selected = item;
+        }
+      });
+
+      setActive(selected || first);
+    }
+
+    function selectActiveOption() {
+      const active = optionsContainer.querySelector(".wallet-select-option.active");
+      if (!active) return;
+      const value = active.dataset.value || "";
+      if (sel.value !== value) {
+        sel.value = value;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      closeDropdown();
+    }
+
+    wrapper.addEventListener("click", () => {
+      if (dropdown.classList.contains("d-none")) {
+        openDropdown();
+      } else {
+        closeDropdown();
+      }
+    });
+
+    wrapper.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        if (dropdown.classList.contains("d-none")) openDropdown();
+        else closeDropdown();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (dropdown.classList.contains("d-none")) {
+          openDropdown();
+        } else {
+          const visible = getVisibleItems();
+          if (visible.length) setActive(visible[0]);
+        }
+      }
+    });
+
+    searchInput.addEventListener("input", () => {
+      filterOptions();
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        const items = getVisibleItems();
+        if (!items.length) return;
+        const active = optionsContainer.querySelector(".wallet-select-option.active");
+        const index = active ? items.indexOf(active) : -1;
+        const next = items[Math.min(items.length - 1, Math.max(0, index + 1))];
+        if (next) setActive(next);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const items = getVisibleItems();
+        if (!items.length) return;
+        const active = optionsContainer.querySelector(".wallet-select-option.active");
+        const index = active ? items.indexOf(active) : 0;
+        const prev = items[Math.min(items.length - 1, Math.max(0, index - 1))];
+        if (prev) setActive(prev);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        selectActiveOption();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        closeDropdown();
+      }
+    });
+
+    optionsContainer.addEventListener("click", (event) => {
+      const target = event.target instanceof Element ? event.target.closest(".wallet-select-option") : null;
+      if (!target) return;
+      const value = target.dataset.value || "";
+      if (sel.value !== value) {
+        sel.value = value;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      closeDropdown();
+    });
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!target) return;
+      if (
+        !wrapper.contains(target) &&
+        !dropdown.contains(target) &&
+        target !== wrapper &&
+        target !== dropdown
+      ) {
+        closeDropdown();
+      }
+    });
+
+    sel.addEventListener("change", () => {
+      syncWalletPickerSelection();
+    });
+
+    renderWalletPickerOptions();
+    syncWalletPickerSelection();
+  }
+
   function attach() {
     const sel = q("walletSelect");
     if (sel) sel.addEventListener("change", () => onWalletChange());
+    try {
+      attachWalletPicker();
+    } catch (e) {}
     // fixed value buttons handle charged amount; hidden select kept for compatibility
     const doBuyBtn = q("doBuy");
     if (doBuyBtn) doBuyBtn.addEventListener("click", () => doAction("buy"));
@@ -1341,6 +1545,10 @@ try {
       try {
         const saved = localStorage.getItem(SELECTED_WALLET_KEY);
         if (saved) sel.value = saved;
+      } catch (e) {}
+      try {
+        renderWalletPickerOptions();
+        syncWalletPickerSelection();
       } catch (e) {}
     });
   }
