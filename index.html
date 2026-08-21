@@ -141,6 +141,8 @@
 
   <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.2.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 
 </head>
 
@@ -353,7 +355,7 @@
             <div class="row g-2 align-items-end">
               <div class="col-12 col-md-8">
                 <label class="form-label">اختر المحفظة</label>
-                <div class="wallet-select-wrapper">
+                <div class="wallet-select-wrapper d-none">
                   <div id="walletPicker" class="wallet-select-toggle" role="button" aria-haspopup="listbox" aria-expanded="false" tabindex="0">
                     <span id="walletPickerLabel">-- اختر --</span>
                     <span class="dropdown-arrow">▾</span>
@@ -363,7 +365,7 @@
                     <div id="walletPickerOptions" class="wallet-select-options"></div>
                   </div>
                 </div>
-                <select id="walletSelect" class="form-select d-none" aria-hidden="true" tabindex="-1">
+                <select id="walletSelect" class="form-select" data-placeholder="-- اختر --">
                   <option value="">-- اختر --</option>
                 </select>
               </div>
@@ -439,6 +441,24 @@
 <script src="theme-toggle.js"></script>
 <script src="scroll-controls.js"></script>
   <script src="autocomplete.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script>
+    (function () {
+      try {
+        document.addEventListener('DOMContentLoaded', function () {
+          if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') return;
+          // Initialize Select2 on the wallet select with RTL support
+          $('#walletSelect').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: $('#walletSelect').data('placeholder') || 'اختر المحفظة',
+            dir: 'rtl'
+          });
+        });
+      } catch (e) { console.warn(e); }
+    })();
+  </script>
 </body>
 
 </html>
