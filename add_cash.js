@@ -1099,13 +1099,49 @@
   }
 
   async function zeroAll() {
-    if (!(await swalConfirm("هل تريد تصفير جميع المحافظ؟"))) return;
-    wallets.forEach((w) => (w.balance = 0));
+    if (
+      !(await swalConfirm(
+        "هل تريد تصفير أرصدة جميع المحافظ والأرباح وسجل العمليات؟",
+      ))
+    )
+      return;
+
+    wallets.forEach((w) => {
+      w.balance = 0;
+      w.initialBalance = 0;
+      [
+        "buyValue",
+        "buyDaily",
+        "soldValue",
+        "soldDaily",
+        "receivedValue",
+        "receivedDaily",
+        "transferredValue",
+        "transferredDaily",
+      ].forEach((key) => {
+        if (Object.prototype.hasOwnProperty.call(w, key)) w[key] = 0;
+      });
+    });
     saveWalletsToStorage();
+
+    try {
+      localStorage.setItem("transactions_v1", "[]");
+      window.dispatchEvent(new Event("txsUpdated"));
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "transactions_v1",
+          newValue: "[]",
+        }),
+      );
+    } catch (e) {
+      console.error("zeroAll transactions reset error", e);
+    }
+
     renderTable();
     selectedWallets.clear();
     updateSelectedCount();
-    alert("تم تصفير جميع المحافظ");
+    computeAnalytics();
+    alert("تم تصفير أرصدة المحافظ والأرباح والعمليات");
   }
 
   // Periodic reminder check (every 60s). Marks notification flags and saves once.
