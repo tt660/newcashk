@@ -506,6 +506,52 @@
     setTimeout(() => win.print(), 300);
   }
 
+  function clearAllReportsAndTransactions() {
+    const confirmed = window.confirm(
+      "هل أنت متأكد أنك تريد مسح جميع العمليات المسجلة والأرباح؟ هذا الإجراء لا يمكن التراجع عنه.",
+    );
+    if (!confirmed) return;
+
+    try {
+      localStorage.setItem(TX_KEY, JSON.stringify([]));
+      localStorage.setItem("daily_invoices_v1", JSON.stringify([]));
+      try {
+        window.dispatchEvent(new Event("txsUpdated"));
+      } catch (e) {}
+    } catch (e) {
+      alert("تعذر مسح البيانات من التخزين المحلي.");
+      return;
+    }
+
+    lastFiltered = [];
+    latestNetProfit = 0;
+    profitVisibilityUnlocked = false;
+
+    q("rptTotalTx").textContent = "0";
+    q("rptTotalBuy").textContent = "0.00";
+    q("rptTotalSell").textContent = "0.00";
+    q("rptTotalAmount").textContent = "0.00";
+    renderProfitValues(0);
+
+    const resultsAccordion = q("reportResultsAccordion");
+    const resultsTable = q("reportResultsTable");
+    if (resultsAccordion) resultsAccordion.innerHTML = "";
+    if (resultsTable) resultsTable.innerHTML = "";
+    if (q("reportPagination")) q("reportPagination").innerHTML = "";
+
+    if (window.Swal && typeof window.Swal.fire === "function") {
+      Swal.fire({
+        title: "تم المسح",
+        text: "تم حذف جميع العمليات المسجلة وأُعيدت الأرباح إلى صفر.",
+        icon: "success",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } else {
+      alert("تم حذف جميع العمليات المسجلة وأُعيدت الأرباح إلى صفر.");
+    }
+  }
+
   function renderChart(rows) {
     // simple dataset: total buy vs sell
     const buys = rows
@@ -648,6 +694,7 @@
     q("exportCsv")?.addEventListener("click", exportCsv);
     q("exportExcel")?.addEventListener("click", exportExcel);
     q("printReport")?.addEventListener("click", printReport);
+    q("clearReportsBtn")?.addEventListener("click", clearAllReportsAndTransactions);
     q("unlockProfitBtn")?.addEventListener("click", unlockProfitValues);
     q("unlockProfitSummaryBtn")?.addEventListener("click", unlockProfitValues);
     // populate wallets and run initial report
