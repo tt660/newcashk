@@ -49,16 +49,26 @@ try {
       } catch (e) {}
     } catch (e) {}
   }
+  function isMeaningfulTransactionAmount(value) {
+    const num = Number(value);
+    return Number.isFinite(num) && num > 0;
+  }
+
   function getTx() {
     try {
-      return JSON.parse(localStorage.getItem(TX_KEY)) || [];
+      const raw = JSON.parse(localStorage.getItem(TX_KEY)) || [];
+      if (!Array.isArray(raw)) return [];
+      return raw.filter((t) => isMeaningfulTransactionAmount(t && t.amount));
     } catch (e) {
       return [];
     }
   }
   function saveTx(t) {
     try {
-      const payload = JSON.stringify(t);
+      const normalized = Array.isArray(t)
+        ? t.filter((item) => isMeaningfulTransactionAmount(item && item.amount))
+        : t;
+      const payload = JSON.stringify(normalized);
       localStorage.setItem(TX_KEY, payload);
       try {
         window.dispatchEvent(new Event("txsUpdated"));
@@ -70,10 +80,10 @@ try {
         });
         window.dispatchEvent(se);
       } catch (e) {}
-      if (Array.isArray(t)) {
-        console.debug("saveTx: txs saved", t.length);
+      if (Array.isArray(normalized)) {
+        console.debug("saveTx: txs saved", normalized.length);
       } else {
-        console.debug("saveTx: tx saved", t && t.id);
+        console.debug("saveTx: tx saved", normalized && normalized.id);
       }
     } catch (e) {
       console.error("saveTx error", e);
@@ -853,12 +863,13 @@ try {
     if (!container) return;
     const txRecords = getTx();
     const todayOnly = shouldShowTodayTransactions();
-    const filteredTx = todayOnly
-      ? txRecords.filter((t) => (t.date || "").slice(0, 10) === getTodayDate())
-      : txRecords;
+    const filteredTx = txRecords.filter((t) => isMeaningfulTransactionAmount(t && t.amount));
+    const filteredByDay = todayOnly
+      ? filteredTx.filter((t) => (t.date || "").slice(0, 10) === getTodayDate())
+      : filteredTx;
 
     container.innerHTML = "";
-    if (!filteredTx.length) {
+    if (!filteredByDay.length) {
       container.innerHTML = `<div class="empty-log" style="padding:16px;color:#555;text-align:center;">${
         todayOnly
           ? "لا توجد عمليات لهذا اليوم بعد. قم بتنفيذ عملية جديدة أو حرّك الصفحة."
@@ -867,7 +878,7 @@ try {
       return;
     }
 
-    const tx = filteredTx.slice().sort((a, b) => {
+    const tx = filteredByDay.slice().sort((a, b) => {
       const da = new Date(a.date || 0).getTime();
       const db = new Date(b.date || 0).getTime();
       const ta = isFinite(da) ? da : a.id || 0;
@@ -1070,6 +1081,12 @@ try {
     const amount = Number(q("chargedAmount").value) || 0;
     const paid = Number(q("paidAmount").value) || 0;
     if (!walletId && !phone) return alert("حدد محفظة أو أدخل رقم");
+    if (!isMeaningfulTransactionAmount(amount)) {
+      return alert("المبلغ يجب أن يكون أكبر من صفر");
+    }
+    if (!Number.isFinite(paid) || paid < 0) {
+      return alert("المبلغ المدفوع غير صحيح");
+    }
     const wallets = getWallets();
     let wallet = wallets.find((w) => String(w.id) === String(walletId));
     if (!wallet && phone) {
